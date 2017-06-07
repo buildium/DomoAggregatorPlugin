@@ -3,7 +3,6 @@ using PluginUtil;
 using System.AddIn;
 using System.Collections.Generic;
 using System.Linq;
-using DevExpress.XtraDataLayout;
 using WorkbenchPlugin.Views.Plugin.v2;
 using WorkbenchPlugin.Views.Plugin.v2.DataProvider;
 

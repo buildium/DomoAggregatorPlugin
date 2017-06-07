@@ -33,48 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ActiproSoftware.Shared.WinForms">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\ActiproSoftware.Shared.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="ActiproSoftware.SyntaxEditor.WinForms">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\ActiproSoftware.SyntaxEditor.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.BonusSkins.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.BonusSkins.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Data.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.Data.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Printing.v14.2.Core">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.Printing.v14.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Sparkline.v14.2.Core">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.Sparkline.v14.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Utils.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.Utils.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraBars.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraBars.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraEditors.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraEditors.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraGrid.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraGrid.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraLayout.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraLayout.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraNavBar.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraNavBar.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraTreeList.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraTreeList.v14.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraWizard.v14.2">
-      <HintPath>..\..\..\..\Users\josh.molloy\Downloads\Workbench\DevExpress.XtraWizard.v14.2.dll</HintPath>
-    </Reference>
     <Reference Include="DomoApi">
       <HintPath>..\..\..\..\Program Files\Domo\Workbench\DomoApi.dll</HintPath>
     </Reference>
@@ -176,6 +134,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
