@@ -87,8 +87,9 @@
     <Reference Include="Workbench.Library">
       <HintPath>..\..\..\..\Program Files\Domo\Workbench\Workbench.Library.dll</HintPath>
     </Reference>
-    <Reference Include="WorkbenchPlugin.Views.Plugin.v2">
-      <HintPath>C:\Program Files\Domo\Workbench\SDK\WorkbenchPlugin.Views.Plugin.v2.dll</HintPath>
+    <Reference Include="WorkbenchPlugin.Views.Plugin.v2, Version=4.51.6243.37366, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Program Files\Domo\Workbench\SDK\WorkbenchPlugin.Views.Plugin.v2.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="WorkbenchSDK">
@@ -110,8 +111,12 @@
     <Compile Include="DataReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\DataProviderControl.xaml">

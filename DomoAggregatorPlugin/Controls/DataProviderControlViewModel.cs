@@ -1,5 +1,4 @@
-﻿using DomoAggregatorPlugin;
-using GalaSoft.MvvmLight;
+﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using PluginUtil;
 using System;
