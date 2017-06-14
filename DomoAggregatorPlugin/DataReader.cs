@@ -281,7 +281,8 @@ namespace DomoAggregatorPlugin
         /// <param name="ex">The optional <see cref="Exception"/> to log</param>
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
-            _callbackHost.LogEvent(logMessageType, message, ex);
+            //Better used for testing to reduce the amount of I/O
+            //_callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
