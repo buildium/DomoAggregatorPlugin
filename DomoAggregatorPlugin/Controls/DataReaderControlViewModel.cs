@@ -10,9 +10,7 @@ namespace DomoAggregatorPlugin.Controls
     {
         private readonly IWorkbenchHost _callbackHost;
         private string _query;
-        private IDictionary<string, string> _queryVariables;
-        private string _delimitedQueryVariables;
-        private bool _isUsingLastValue;
+        private int _timeout;
 
         public DataReaderControlViewModel(IWorkbenchHost callbackHost, IWorkbenchDataProviderPlugin dataProvider)
         {
@@ -21,7 +19,7 @@ namespace DomoAggregatorPlugin.Controls
             var p = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
 
             _query = p.Query;
-            _isUsingLastValue = p.IsUsingLastValue;
+            _timeout = p.Timeout;
             QueryVariables = p.QueryVariables;
         }
 
@@ -39,12 +37,12 @@ namespace DomoAggregatorPlugin.Controls
             }
         }
 
-        public bool IsUsingLastValue
+        public int Timeout
         {
-            get { return _isUsingLastValue; }
+            get { return _timeout; }
             set
             {
-                if (Set("IsUsingLastValue", ref _isUsingLastValue, value))
+                if (Set("Timeout", ref _timeout, value))
                 {
                     SavePropertyChanges();
                 }
@@ -56,7 +54,7 @@ namespace DomoAggregatorPlugin.Controls
             var p = new MyDataReaderProperties
             {
                 Query = _query,
-                IsUsingLastValue = _isUsingLastValue
+                Timeout = _timeout
             };
 
             _callbackHost.SetReaderProperties(PropertyHelper.Serialize(p));

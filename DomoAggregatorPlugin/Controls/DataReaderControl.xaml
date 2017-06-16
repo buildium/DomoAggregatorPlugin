@@ -15,12 +15,13 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
                 <RowDefinition Height="181"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Label Content="Query:" Margin="1,2,3,3.333"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="10,10,0,10.333" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" Width="364" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Visible" AcceptsReturn="True">
+            <Label Content="Timeout (ms):" Margin="1,2,3,3.333"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="10,8,3,3.333" Text="{Binding Timeout, UpdateSourceTrigger=PropertyChanged}" Height="20" Width="40" HorizontalAlignment="Left" VerticalAlignment="Top" AcceptsReturn="True">
                 <TextBox.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
@@ -29,8 +30,18 @@
                     </TransformGroup>
                 </TextBox.RenderTransform>
             </TextBox>
-            <Label Grid.Row="1" Grid.Column="0" Content="Query Variables:" Margin="1,9.667,3,0" ToolTip="Example: lastvalue=0"/>
-            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,10,10,10">
+            <Label Grid.Row="1" Grid.Column="0" Content="Query:" Margin="1,2,3,3.333"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="10,10,0,10.333" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" Width="364" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Visible" AcceptsReturn="True">
+                <TextBox.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBox.RenderTransform>
+            </TextBox>
+            <Label Grid.Row="2" Grid.Column="0" Content="Query Variables:" Margin="1,9.667,3,0" ToolTip="Example: lastvalue=0"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,10,10,10">
                 <ListBox 
                     ItemsSource="{Binding Path=QueryVariables}">
                     <ListBox.ItemTemplate>

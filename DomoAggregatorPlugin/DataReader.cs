@@ -233,6 +233,7 @@ namespace DomoAggregatorPlugin
                 LogEvent(LogMessageType.Warning, connectionString);
                 var odbcConnection = new OdbcConnection(connectionString);
                 var command = new OdbcCommand(parsedQuery, odbcConnection);
+                command.CommandTimeout = _readerProperties.Timeout;
                 odbcConnection.Open();
                 var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
                 _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
@@ -294,6 +295,7 @@ namespace DomoAggregatorPlugin
 
         public MyDataReaderProperties()
         {
+            Timeout = 300;
             QueryVariables = new Dictionary<string, string>();
         }
 
@@ -304,7 +306,7 @@ namespace DomoAggregatorPlugin
 
         public IDictionary<string, string> QueryVariables { get; set; }
 
-        public bool IsUsingLastValue { get; set; }
+        public int Timeout { get; set; }
     }
 
     public class ConnectionMetadata
