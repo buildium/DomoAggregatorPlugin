@@ -8,9 +8,9 @@ using System.Data.Odbc;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using WorkbenchPlugin.Views.Plugin.v2;
-using WorkbenchPlugin.Views.Plugin.v2.DataProvider;
-using WorkbenchPlugin.Views.Plugin.v2.DataReader;
+using WorkbenchPlugin.Views.Plugin.v3;
+using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
+using WorkbenchPlugin.Views.Plugin.v3.DataReader;
 
 namespace DomoAggregatorPlugin
 {

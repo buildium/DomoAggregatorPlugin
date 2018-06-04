@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using GalaSoft.MvvmLight;
 using PluginUtil;
-using WorkbenchPlugin.Views.Plugin.v2;
-using WorkbenchPlugin.Views.Plugin.v2.DataProvider;
+using WorkbenchPlugin.Views.Plugin.v3;
+using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
 
 namespace DomoAggregatorPlugin.Controls
 {

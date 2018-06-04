@@ -2,7 +2,7 @@
 using GalaSoft.MvvmLight.Command;
 using PluginUtil;
 using System;
-using WorkbenchPlugin.Views.Plugin.v2;
+using WorkbenchPlugin.Views.Plugin.v3;
 
 namespace DomoAggregatorPlugin.Controls
 {

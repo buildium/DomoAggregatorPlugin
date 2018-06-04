@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using WorkbenchPlugin.Views.Plugin.v2.DataReader;
+using WorkbenchPlugin.Views.Plugin.v3.DataReader;
 
 namespace DomoAggregatorPlugin.Controls
 {
@@ -54,6 +54,11 @@ namespace DomoAggregatorPlugin.Controls
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
         }

@@ -3,8 +3,9 @@ using PluginUtil;
 using System.AddIn;
 using System.Collections.Generic;
 using System.Linq;
-using WorkbenchPlugin.Views.Plugin.v2;
-using WorkbenchPlugin.Views.Plugin.v2.DataProvider;
+using WorkbenchPlugin.Views.Plugin.v3;
+using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
+
 
 namespace DomoAggregatorPlugin
 {
@@ -50,7 +51,7 @@ namespace DomoAggregatorPlugin
 
         /// <summary>
         /// Returns the type of data this provider creates.
-        /// This should be used with <see cref="WorkbenchPlugin.Views.Plugin.v1.SourceType"/>
+        /// This should be used with <see cref="SourceType"/>
         /// </summary>
         public string ProviderSourceType
         {
@@ -168,6 +169,12 @@ namespace DomoAggregatorPlugin
         {
             _callbackHost = hostObj;
         }
+
+        public bool SupportsHighBandwidthExecutionPipeline
+        {
+            get { return false; }
+        }
+  
     }
 
     /// <summary>
