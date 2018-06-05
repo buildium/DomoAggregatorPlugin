@@ -37,13 +37,13 @@
       <HintPath>..\packages\CommonServiceLocator.2.0.3\lib\net45\CommonServiceLocator.dll</HintPath>
     </Reference>
     <Reference Include="DomoControls">
-      <HintPath>C:\Users\alex.yuan\Desktop\DomoPluginThing\DomoAggregatorPlugin\DomoPackages\DomoControls.dll</HintPath>
+      <HintPath>..\DomoPackages\DomoControls.dll</HintPath>
     </Reference>
     <Reference Include="DomoDataProviders">
-      <HintPath>C:\Users\alex.yuan\Desktop\DomoPluginThing\DomoAggregatorPlugin\DomoPackages\DomoDataProviders.dll</HintPath>
+      <HintPath>..\DomoPackages\DomoDataProviders.dll</HintPath>
     </Reference>
     <Reference Include="DomoDataReaders">
-      <HintPath>C:\Users\alex.yuan\Desktop\DomoPluginThing\DomoAggregatorPlugin\DomoPackages\DomoDataReaders.dll</HintPath>
+      <HintPath>..\DomoPackages\DomoDataReaders.dll</HintPath>
     </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.4.1.0, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
@@ -80,15 +80,15 @@
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="Workbench.Library">
-      <HintPath>C:\Users\alex.yuan\Desktop\DomoPluginThing\DomoAggregatorPlugin\DomoPackages\Workbench.Library.dll</HintPath>
+      <HintPath>..\DomoPackages\Workbench.Library.dll</HintPath>
     </Reference>
     <Reference Include="WorkbenchPlugin.Views.Plugin.v2, Version=4.51.6243.37366, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\alex.yuan\Desktop\DomoPluginThing\DomoAggregatorPlugin\DomoPackages\WorkbenchPlugin.Views.Plugin.v3.dll</HintPath>
+      <HintPath>..\DomoPackages\WorkbenchPlugin.Views.Plugin.v3.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="WorkbenchSDK">
-      <HintPath>C:\Users\alex.yuan\Desktop\DomoPluginThing\DomoAggregatorPlugin\DomoPackages\WorkbenchSDK.dll</HintPath>
+      <HintPath>..\DomoPackages\WorkbenchSDK.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
