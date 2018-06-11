@@ -289,7 +289,7 @@ namespace DomoAggregatorPlugin
 
     /// <summary>
     /// Stores the values from the user control for the reader to use.
-    /// </summary>
+    /// </summary>gi
     public class MyDataReaderProperties
     {
 
