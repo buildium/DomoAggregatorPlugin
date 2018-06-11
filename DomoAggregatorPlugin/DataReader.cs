@@ -155,7 +155,6 @@ namespace DomoAggregatorPlugin
         {
             if (_moveNextBool)
             {
-                LogEvent(LogMessageType.Progress, "AHHHHHHHHHHHHHHHHH");
                 MoveNext();
                 _moveNextBool = false;
             }
