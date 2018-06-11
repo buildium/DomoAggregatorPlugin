@@ -33,6 +33,7 @@ namespace DomoAggregatorPlugin
         private const string LastValueParameter = "lastvalue";
 
         private int _count;
+        private bool _pleaseWork = false;
 
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
@@ -154,10 +155,12 @@ namespace DomoAggregatorPlugin
         /// <returns>A list of row data.</returns>
         public List<object> GetRowData()
         {
-            if (_count > 1)
+            LogEvent(LogMessageType.Progress, _count.ToString());
+            if (_pleaseWork)
             {
                 LogEvent(LogMessageType.Progress, "In GetRowData() about to call MoveNext()");
                 MoveNext();
+                _pleaseWork = false;
             }
 
             LogEvent(LogMessageType.Progress, "GetRowData Start");
@@ -215,6 +218,7 @@ namespace DomoAggregatorPlugin
                     return true;
                 }
             }
+
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
             var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
             List<string> systemDsnList = new List<string>(0);
@@ -227,6 +231,7 @@ namespace DomoAggregatorPlugin
             {
                 LogEvent(LogMessageType.Progress, "Calling open() in MoveNext");
                 Open();
+                _pleaseWork = true;
                 return true;
             }
             LogEvent(LogMessageType.Progress, "MoveNext Ended");
@@ -313,7 +318,7 @@ namespace DomoAggregatorPlugin
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
             //Better used for testing to reduce the amount of I/O
-            _callbackHost.LogEvent(logMessageType, message, ex);
+            //_callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
