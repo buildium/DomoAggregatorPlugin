@@ -211,6 +211,7 @@ namespace DomoAggregatorPlugin
         /// </summary>
         public void Open()
         {
+
             LogEvent(LogMessageType.Progress, "Open start");
 
             // load the properties from the UI
