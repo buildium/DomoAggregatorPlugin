@@ -1,0 +1,167 @@
+[1mdiff --git a/DomoAggregatorPlugin/DataReader.cs b/DomoAggregatorPlugin/DataReader.cs[m
+[1mindex e63ae92..6c128dc 100755[m
+[1m--- a/DomoAggregatorPlugin/DataReader.cs[m
+[1m+++ b/DomoAggregatorPlugin/DataReader.cs[m
+[36m@@ -5,12 +5,15 @@[m [musing System.AddIn;[m
+ using System.Collections.Generic;[m
+ using System.Data;[m
+ using System.Data.Odbc;[m
+[32m+[m[32musing System.Diagnostics;[m
+ using System.Linq;[m
+ using System.Text;[m
+ using System.Text.RegularExpressions;[m
+[32m+[m[32musing System.Windows.Documents;[m
+ using WorkbenchPlugin.Views.Plugin.v3;[m
+ using WorkbenchPlugin.Views.Plugin.v3.DataProvider;[m
+ using WorkbenchPlugin.Views.Plugin.v3.DataReader;[m
+[32m+[m[32musing WorkbenchSDK.Logging;[m
+ [m
+ namespace DomoAggregatorPlugin[m
+ {[m
+[36m@@ -31,6 +34,9 @@[m [mnamespace DomoAggregatorPlugin[m
+         private const string DatabaseSourceColumnName = "subscriber_database";[m
+         private const string LastValueParameter = "lastvalue";[m
+ [m
+[32m+[m[32m        private int count = 0;[m
+[32m+[m
+[32m+[m
+         /// <summary>[m
+         /// Any execution characteristics that are needed by this DataReader[m
+         /// </summary>[m
+[36m@@ -126,7 +132,7 @@[m [mnamespace DomoAggregatorPlugin[m
+             LogEvent(LogMessageType.Progress, "GetDataReader called");[m
+             return new DataReaderControl(new DataReaderControlViewModel(_callbackHost, _dataProvider));[m
+         }[m
+[31m-[m
+[32m+[m[41m        [m
+         /// <summary>[m
+         /// Gets the column headers for each row.[m
+         /// </summary>[m
+[36m@@ -147,17 +153,17 @@[m [mnamespace DomoAggregatorPlugin[m
+         /// While the <see cref="DomoAggregatorPlugin.DataReader.MoveNext"/> returns true, this method will be invoked to get the[m
+         /// row data.  The data needs to be in the same order that the <see cref="DomoAggregatorPlugin.DataReader.GetHeaders"/> returns.[m
+         /// </summary>[m
+[31m-        /// <returns>A list of row data.</returns>[m
+[32m+[m[32m        /// <returns>A list of row data.</returns>[m[41m[m
+         public List<object> GetRowData()[m
+         {[m
+[31m-            LogEvent(LogMessageType.Progress, "GetRowData Start");[m
+[32m+[m[32m            //LogEvent(LogMessageType.Progress, "GetRowData Start");[m
+             List<object> rowData = new List<object>();[m
+ [m
+             // send the row data back in the same order as the headers[m
+             foreach (var header in GetHeaders())[m
+             {[m
+                 //Add data for additional data source column allowing us to determine where the query results originated from[m
+[31m-                if (DatabaseSourceColumnName.Equals(header))[m
+[32m+[m[32m                if (DatabaseSourceColumnName.Equals(header))//adds schema column to the dataset stored in memory(i.e. subscriber a,b,c,d)[m
+                 {[m
+                     rowData.Add(_currentConnection.DSN);[m
+                     continue;[m
+[36m@@ -176,9 +182,9 @@[m [mnamespace DomoAggregatorPlugin[m
+                 {[m
+                     throw new OperationCanceledException();[m
+                 }[m
+[31m-            }[m
+[31m-[m
+[31m-            LogEvent(LogMessageType.Progress, "GetRowData End");[m
+[32m+[m[32m            }[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m            //LogEvent(LogMessageType.Progress, "GetRowData End");[m
+ [m
+             return rowData;[m
+         }[m
+[36m@@ -203,16 +209,30 @@[m [mnamespace DomoAggregatorPlugin[m
+                     return true;[m
+                 }[m
+             }[m
+[32m+[m[32m            _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());[m
+[32m+[m
+[32m+[m[32m            var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());[m
+[32m+[m
+[32m+[m[32m            count = count + 1;[m
+[32m+[m[32m            List<string> systemDSNList = new List<string>(0);[m
+[32m+[m[32m            foreach (var dummySystemDSN in dataProviderProperties.ConnectionStrings)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                systemDSNList.Add(dummySystemDSN);[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            while (systemDSNList[count] != null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                LogEvent(LogMessageType.Debug, "HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEE");[m
+[32m+[m[32m                Open(count);[m
+[32m+[m[32m            }[m
+[32m+[m
+             return false;[m
+         }[m
+[31m-[m
+         /// <summary>[m
+         /// Opens the data set in preparation for the Read operation.[m
+         /// </summary>[m
+[31m-        public void Open()[m
+[32m+[m[32m        public void Open(int count)[m
+         {[m
+[31m-            LogEvent(LogMessageType.Progress, "Open start");[m
+[31m-[m
+             // load the properties from the UI[m
+             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());[m
+ [m
+[36m@@ -221,23 +241,28 @@[m [mnamespace DomoAggregatorPlugin[m
+             if (string.IsNullOrEmpty(_readerProperties.Query))[m
+             {[m
+                 LogEvent(LogMessageType.Error, "No Query was provided. Please update the Source with a valid SQL query.");[m
+[32m+[m[41m          [m
+[32m+[m[41m          [m
+             }[m
+             // *******************************************************[m
+[31m-[m
+[31m-[m
+[31m-            foreach (var systemDSN in dataProviderProperties.ConnectionStrings)[m
+[32m+[m[32m            // Creates List with all schemas appended (subscribera, subscriber2a, etc)[m
+[32m+[m[32m            List<string> systemDSNList = new List<string>(0);[m
+[32m+[m[32m            foreach (var dummySystemDSN in dataProviderProperties.ConnectionStrings)[m
+             {[m
+[31m-                var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,[m
+[31m-                    _readerProperties.QueryVariables);[m
+[31m-                var connectionString = $"Dsn={systemDSN};";[m
+[31m-                LogEvent(LogMessageType.Warning, connectionString);[m
+[31m-                var odbcConnection = new OdbcConnection(connectionString);[m
+[31m-                var command = new OdbcCommand(parsedQuery, odbcConnection);[m
+[31m-                command.CommandTimeout = _readerProperties.Timeout;[m
+[31m-                odbcConnection.Open();[m
+[31m-                var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);[m
+[31m-                _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));[m
+[31m-            }[m
+[32m+[m[32m                systemDSNList.Add(dummySystemDSN);[m
+[32m+[m[32m            }[m[41m       [m
+[32m+[m[32m            string systemDSN = systemDSNList[count];[m
+[32m+[m[32m            var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,[m
+[32m+[m[32m                _readerProperties.QueryVariables);[m
+[32m+[m[32m            var connectionString = $"Dsn={systemDSN};";[m
+[32m+[m[32m            LogEvent(LogMessageType.Warning, connectionString);[m
+[32m+[m[32m            var odbcConnection = new OdbcConnection(connectionString);[m
+[32m+[m[32m            var command = new OdbcCommand(parsedQuery, odbcConnection);[m
+[32m+[m[32m            command.CommandTimeout = _readerProperties.Timeout;[m
+[32m+[m[32m            odbcConnection.Open();[m
+[32m+[m[32m            var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);[m
+[32m+[m[32m            _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));[m
+[32m+[m[41m       [m
+ [m
+             LogEvent(LogMessageType.Progress, "Open end");[m
+         }[m
+[36m@@ -283,8 +308,13 @@[m [mnamespace DomoAggregatorPlugin[m
+         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)[m
+         {[m
+             //Better used for testing to reduce the amount of I/O[m
+[31m-            //_callbackHost.LogEvent(logMessageType, message, ex);[m
+[31m-        }[m
+[32m+[m[32m            _callbackHost.LogEvent(logMessageType, message, ex);[m
+[32m+[m[32m        }[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m        public void Open()[m[41m[m
+[32m+[m[32m        {[m[41m[m
+[32m+[m[32m            throw new NotImplementedException();[m[41m[m
+[32m+[m[32m        }[m[41m[m
+     }[m
+ [m
+     /// <summary>[m
