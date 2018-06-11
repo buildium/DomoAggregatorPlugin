@@ -32,7 +32,7 @@ namespace DomoAggregatorPlugin
         private const string DatabaseSourceColumnName = "subscriber_database";
         private const string LastValueParameter = "lastvalue";
 
-        private int count = 0;
+        private int _count;
 
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
@@ -154,7 +154,7 @@ namespace DomoAggregatorPlugin
         /// <returns>A list of row data.</returns>
         public List<object> GetRowData()
         {
-            if (count > 1)
+            if (_count > 1)
             {
                 LogEvent(LogMessageType.Progress, "In GetRowData() about to call MoveNext()");
                 MoveNext();
@@ -223,7 +223,7 @@ namespace DomoAggregatorPlugin
                 systemDsnList.Add(systemDsn);
             }
 
-            if (count < systemDsnList.Count)
+            if (_count < systemDsnList.Count)
             {
                 LogEvent(LogMessageType.Progress, "Calling open() in MoveNext");
                 Open();
@@ -257,7 +257,7 @@ namespace DomoAggregatorPlugin
             {
                 systemDsnList.Add(systemDsn);
             }
-            var systemDSN = systemDsnList[count];
+            var systemDSN = systemDsnList[_count];
             LogEvent(LogMessageType.Progress, systemDSN);
             var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
                 _readerProperties.QueryVariables);
@@ -269,7 +269,7 @@ namespace DomoAggregatorPlugin
             var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
             LogEvent(LogMessageType.Progress, "connection closed");
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
-            count = count + 1;
+            _count++;
             LogEvent(LogMessageType.Progress, "Open end");
         }
         private string FindReplacementParameters(string query, string systemDSN, IDictionary<string, string> replacementValues)
@@ -313,7 +313,7 @@ namespace DomoAggregatorPlugin
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
             //Better used for testing to reduce the amount of I/O
-            //_callbackHost.LogEvent(logMessageType, message, ex);
+            _callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
