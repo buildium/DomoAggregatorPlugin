@@ -31,6 +31,9 @@ namespace DomoAggregatorPlugin
         private const string DatabaseSourceColumnName = "subscriber_database";
         private const string LastValueParameter = "lastvalue";
 
+        private int _count;
+        private bool _moveNextBool;
+
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
         /// </summary>
@@ -150,6 +153,12 @@ namespace DomoAggregatorPlugin
         /// <returns>A list of row data.</returns>
         public List<object> GetRowData()
         {
+            if (_moveNextBool)
+            {
+                LogEvent(LogMessageType.Progress, "AHHHHHHHHHHHHHHHHH");
+                MoveNext();
+                _moveNextBool = false;
+            }
             LogEvent(LogMessageType.Progress, "GetRowData Start");
             List<object> rowData = new List<object>();
 
@@ -203,6 +212,22 @@ namespace DomoAggregatorPlugin
                     return true;
                 }
             }
+            _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
+            var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
+            List<string> systemDsnList = new List<string>();
+            foreach (var systemDsn in dataProviderProperties.ConnectionStrings)
+            {
+                systemDsnList.Add(systemDsn);
+            }
+
+            if (_count < systemDsnList.Count)
+            {
+                Open();
+                _moveNextBool = true;
+                return true;
+            }
+
+
             return false;
         }
 
@@ -225,20 +250,25 @@ namespace DomoAggregatorPlugin
             }
             // *******************************************************
 
-
-            foreach (var systemDSN in dataProviderProperties.ConnectionStrings)
+            List<string> systemDsnList = new List<string>(0);
+            foreach (var systemDsn in dataProviderProperties.ConnectionStrings)
             {
-                var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
-                    _readerProperties.QueryVariables);
-                var connectionString = $"Dsn={systemDSN};";
-                LogEvent(LogMessageType.Warning, connectionString);
-                var odbcConnection = new OdbcConnection(connectionString);
-                var command = new OdbcCommand(parsedQuery, odbcConnection);
-                command.CommandTimeout = _readerProperties.Timeout;
-                odbcConnection.Open();
-                var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
-                _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
+                systemDsnList.Add(systemDsn);
             }
+
+            var systemDSN = systemDsnList[_count];
+            var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
+                    _readerProperties.QueryVariables);
+            var connectionString = $"Dsn={systemDSN};";
+            LogEvent(LogMessageType.Warning, connectionString);
+            var odbcConnection = new OdbcConnection(connectionString);
+            var command = new OdbcCommand(parsedQuery, odbcConnection);
+            command.CommandTimeout = _readerProperties.Timeout;
+            odbcConnection.Open();
+            var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
+            _count++;
+            
 
             LogEvent(LogMessageType.Progress, "Open end");
         }
@@ -284,7 +314,7 @@ namespace DomoAggregatorPlugin
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
             //Better used for testing to reduce the amount of I/O
-            //_callbackHost.LogEvent(logMessageType, message, ex);
+            _callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
