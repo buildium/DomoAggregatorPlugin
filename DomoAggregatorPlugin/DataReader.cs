@@ -154,6 +154,12 @@ namespace DomoAggregatorPlugin
         /// <returns>A list of row data.</returns>
         public List<object> GetRowData()
         {
+            if (count > 1)
+            {
+                LogEvent(LogMessageType.Progress, "In GetRowData() about to call MoveNext()");
+                MoveNext();
+            }
+
             LogEvent(LogMessageType.Progress, "GetRowData Start");
             List<object> rowData = new List<object>();
 
@@ -164,13 +170,10 @@ namespace DomoAggregatorPlugin
 
                 if (DatabaseSourceColumnName.Equals(header))
                 {
-                    LogEvent(LogMessageType.Progress, "in the if statement thing");
+                    LogEvent(LogMessageType.Progress, "Adding additional data source column (subscribera for example)");
                     rowData.Add(_currentConnection.DSN);
                     continue;
                 }
-                LogEvent(LogMessageType.Progress, _currentConnection.ToString());
-                LogEvent(LogMessageType.Progress, "crash");
-                LogEvent(LogMessageType.Progress, _currentConnection.Reader[header].ToString());
                 rowData.Add(_currentConnection.Reader[header]);
                 var key = $"{_currentConnection.DSN}:{header}";
                 if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
@@ -204,14 +207,14 @@ namespace DomoAggregatorPlugin
         {
             foreach (var connection in _connections)
             {
+                LogEvent(LogMessageType.Progress, "Entered MoveNext connection forloop");
                 if (connection.Reader.Read())
                 {
+                    LogEvent(LogMessageType.Progress, "connection.ReaderRead() is true in MoveNext");
                     _currentConnection = connection;
                     return true;
                 }
             }
-            LogEvent(LogMessageType.Warning, "exited movenext loop");
-
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
             var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
             List<string> systemDsnList = new List<string>(0);
@@ -222,10 +225,11 @@ namespace DomoAggregatorPlugin
 
             if (count < systemDsnList.Count)
             {
+                LogEvent(LogMessageType.Progress, "Calling open() in MoveNext");
                 Open();
                 return true;
             }
-
+            LogEvent(LogMessageType.Progress, "MoveNext Ended");
             return false;
         }
 
@@ -253,12 +257,11 @@ namespace DomoAggregatorPlugin
             {
                 systemDsnList.Add(systemDsn);
             }
-            LogEvent(LogMessageType.Warning, count.ToString());
             var systemDSN = systemDsnList[count];
+            LogEvent(LogMessageType.Progress, systemDSN);
             var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
                 _readerProperties.QueryVariables);
             var connectionString = $"Dsn={systemDSN};";
-            LogEvent(LogMessageType.Warning, connectionString);
             var odbcConnection = new OdbcConnection(connectionString);
             var command = new OdbcCommand(parsedQuery, odbcConnection);
             command.CommandTimeout = _readerProperties.Timeout;
@@ -310,7 +313,7 @@ namespace DomoAggregatorPlugin
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
             //Better used for testing to reduce the amount of I/O
-            _callbackHost.LogEvent(logMessageType, message, ex);
+            //_callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
