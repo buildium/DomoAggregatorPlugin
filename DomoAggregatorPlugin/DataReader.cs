@@ -153,12 +153,20 @@ namespace DomoAggregatorPlugin
         /// <returns>A list of row data.</returns>
         public List<object> GetRowData()
         {
-            if (_moveNextBool)
+            try
             {
-                MoveNext();
-                _moveNextBool = false;
+                if (_moveNextBool)
+                {
+                    MoveNext();
+                    _moveNextBool = false;
+                }
             }
-            LogEvent(LogMessageType.Progress, "GetRowData Start");
+            catch (Exception e)
+            {
+                LogEvent(LogMessageType.Error, "my GetRowData() MoveNext call exception, " + e);
+            }
+
+            //LogEvent(LogMessageType.Progress, "GetRowData Start");
             List<object> rowData = new List<object>();
 
             // send the row data back in the same order as the headers
@@ -171,13 +179,27 @@ namespace DomoAggregatorPlugin
                     continue;
                 }
 
-                rowData.Add(_currentConnection.Reader[header]);
-
-                var key = $"{_currentConnection.DSN}:{header}";
-                if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
+                try
                 {
-                    _readerProperties.QueryVariables[key] = _currentConnection.Reader[header].ToString();
-                    _callbackHost.SetReaderProperties(PropertyHelper.Serialize(_readerProperties));
+                    rowData.Add(_currentConnection.Reader[header]);
+                }
+                catch (Exception e)
+                {
+                    LogEvent(LogMessageType.Error, "Exception when adding to rowData, " + e);
+                }
+
+                try
+                {
+                    var key = $"{_currentConnection.DSN}:{header}";
+                    if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
+                    {
+                        _readerProperties.QueryVariables[key] = _currentConnection.Reader[header].ToString();
+                        _callbackHost.SetReaderProperties(PropertyHelper.Serialize(_readerProperties));
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogEvent(LogMessageType.Error, "some sorta key error exception in getRowData(), " + e);
                 }
 
                 if (_cancelRequested)
@@ -186,7 +208,7 @@ namespace DomoAggregatorPlugin
                 }
             }
 
-            LogEvent(LogMessageType.Progress, "GetRowData End");
+            //LogEvent(LogMessageType.Progress, "GetRowData End");
 
             return rowData;
         }
@@ -203,14 +225,23 @@ namespace DomoAggregatorPlugin
         /// <returns>Whether or not there are more rows to read.</returns>
         public bool MoveNext()
         {
-            foreach (var connection in _connections)
+
+            try
             {
-                if (connection.Reader.Read())
+                foreach (var connection in _connections)
                 {
-                    _currentConnection = connection;
-                    return true;
+                    if (connection.Reader.Read())
+                    {
+                        _currentConnection = connection;
+                        return true;
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                LogEvent(LogMessageType.Error, "MoveNext initial for loop exception, " + e);
+            }
+
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
             var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
             List<string> systemDsnList = new List<string>();
@@ -219,13 +250,19 @@ namespace DomoAggregatorPlugin
                 systemDsnList.Add(systemDsn);
             }
 
-            if (_count < systemDsnList.Count)
+            try
             {
-                Open();
-                _moveNextBool = true;
-                return true;
+                if (_count < systemDsnList.Count)
+                {
+                    Open();
+                    _moveNextBool = true;
+                    return true;
+                }
             }
-
+            catch (Exception e)
+            {
+                LogEvent(LogMessageType.Error, "my Open() call in MoveNext() exception, " + e);
+            }
 
             return false;
         }
@@ -313,7 +350,7 @@ namespace DomoAggregatorPlugin
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
             //Better used for testing to reduce the amount of I/O
-            //_callbackHost.LogEvent(logMessageType, message, ex);
+            _callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
