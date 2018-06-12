@@ -313,7 +313,7 @@ namespace DomoAggregatorPlugin
         private void LogEvent(LogMessageType logMessageType, string message, Exception ex = null)
         {
             //Better used for testing to reduce the amount of I/O
-            _callbackHost.LogEvent(logMessageType, message, ex);
+            //_callbackHost.LogEvent(logMessageType, message, ex);
         }
     }
 
