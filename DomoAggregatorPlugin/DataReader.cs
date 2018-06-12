@@ -155,10 +155,12 @@ namespace DomoAggregatorPlugin
         {
             try
             {
+                // this boolean is changed to true when we manually call open in MoveNext()
+                // without this MoveNext() call, I was getting some sort of "no data in this row/col"
                 if (_moveNextBool)
                 {
                     MoveNext();
-                    _moveNextBool = false;
+                    _moveNextBool = false; //changed back to false so that it isnt always being called(this was the skipping rows problem)
                 }
             }
             catch (Exception e)
@@ -242,6 +244,7 @@ namespace DomoAggregatorPlugin
                 LogEvent(LogMessageType.Error, "MoveNext initial for loop exception, " + e);
             }
 
+            //This creates a string list with all the systemDsn connections(subscriber a, b ,c d)
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
             var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
             List<string> systemDsnList = new List<string>();
@@ -252,10 +255,11 @@ namespace DomoAggregatorPlugin
 
             try
             {
+                //this is called after the first initial iteration of Open(), and continues to call until every Database has been opened and parsed
                 if (_count < systemDsnList.Count)
                 {
                     Open();
-                    _moveNextBool = true;
+                    _moveNextBool = true;//This is set to true so that we call MoveNext() in getRowData()
                     return true;
                 }
             }
@@ -286,12 +290,14 @@ namespace DomoAggregatorPlugin
             }
             // *******************************************************
 
+            //This creates a string list with all the systemDsn connections(subscriber a, b ,c d)
             List<string> systemDsnList = new List<string>(0);
             foreach (var systemDsn in dataProviderProperties.ConnectionStrings)
             {
                 systemDsnList.Add(systemDsn);
             }
 
+            //Made it so that Open() only opens one database(systemDsnList[count]) each time its called
             var systemDSN = systemDsnList[_count];
             var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
                     _readerProperties.QueryVariables);
@@ -303,7 +309,7 @@ namespace DomoAggregatorPlugin
             odbcConnection.Open();
             var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
-            _count++;
+            _count++; // increment count, so that next time Open() is called it is on the next database
             
 
             LogEvent(LogMessageType.Progress, "Open end");
