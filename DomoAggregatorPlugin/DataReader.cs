@@ -162,13 +162,10 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                // this boolean is changed to true when we manually call open in MoveNext()
-                // without this MoveNext() call, I was getting some sort of "no data in this row/col"
                 if (_moveNextBool)
                 {
                     MoveNext();
-                    _moveNextBool =
-                        false; //changed back to false so that it isnt always being called(this was the skipping rows problem)
+                    _moveNextBool = false;
                 }
 
                 //LogEvent(LogMessageType.Progress, "GetRowData Start");
@@ -226,28 +223,16 @@ namespace DomoAggregatorPlugin
             {
                 if (_connections[_count-1].Reader.Read())
                 {
-                    LogEvent(LogMessageType.Progress, "Herdsdsdsdse" + _count);
                     _currentConnection = _connections[_count-1];
                     return true;
                 }
 
-                //This creates a string list with all the systemDsn connections(subscriber a, b ,c d)
-                _readerProperties =
-                    PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
                 var dataProviderProperties =
                     PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
-                List<string> systemDsnList = new List<string>();
-                foreach (var systemDsn in dataProviderProperties.ConnectionStrings)
-                {
-                    systemDsnList.Add(systemDsn);
-                }
-
-
-                //this is called after the first initial iteration of Open(), and continues to call until every Database has been opened and parsed
-                if (_count < systemDsnList.Count)
+                if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
                     OpenHelper();
-                    _moveNextBool = true; //This is set to true so that we call MoveNext() in getRowData()
+                    _moveNextBool = true;
                     return true;
                 }
 
@@ -265,51 +250,23 @@ namespace DomoAggregatorPlugin
         /// </summary>
         public void Open()
         {
-
-            LogEvent(LogMessageType.Progress, "Open start");
-
             // load the properties from the UI
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
-
-            var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
 
             if (string.IsNullOrEmpty(_readerProperties.Query))
             {
                 LogEvent(LogMessageType.Error, "No Query was provided. Please update the Source with a valid SQL query.");
             }
             
-            // *******************************************************
-            //Open opens the first data base when the plugin is run
-            var systemDSN = dataProviderProperties.ConnectionStrings[0];
-            var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
-                    _readerProperties.QueryVariables);
-            var connectionString = $"Dsn={systemDSN};";
-            LogEvent(LogMessageType.Warning, connectionString);
-            var odbcConnection = new OdbcConnection(connectionString);
-            var command = new OdbcCommand(parsedQuery, odbcConnection);
-            command.CommandTimeout = _readerProperties.Timeout;
-            odbcConnection.Open();
-            var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
-            _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
-            _count++; // increment count, so that next time Open() is called it is on the next database
-            
-
-            LogEvent(LogMessageType.Progress, "Open end");
+            OpenHelper();
         }
 
         private void OpenHelper()
         {
-
-            _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
+            LogEvent(LogMessageType.Progress, "Open start");
 
             var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
 
-            //This creates a string list with all the systemDsn connections(subscriber a, b ,c d)
-            //List<string> systemDsnList = new List<string>(0);
-            //foreach (var systemDsn in dataProviderProperties.ConnectionStrings)
-            //{
-            //    systemDsnList.Add(systemDsn);
-            //}
             var systemDSN = dataProviderProperties.ConnectionStrings[_count];
             var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
                 _readerProperties.QueryVariables);
@@ -321,7 +278,10 @@ namespace DomoAggregatorPlugin
             odbcConnection.Open();
             var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
-            _count++; // increment count, so that next time Open() is called it is on the next database
+            _count++; 
+
+            LogEvent(LogMessageType.Progress, "Open end");
+
         }
 
         private string FindReplacementParameters(string query, string systemDSN, IDictionary<string, string> replacementValues)
