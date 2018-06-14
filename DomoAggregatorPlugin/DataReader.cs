@@ -124,7 +124,7 @@ namespace DomoAggregatorPlugin
             catch (Exception e)
             {
                 EmailNotification.EmailNotificationSender(e.ToString());
-                throw new Exception("Unexpected error in Dispose(), check email for details");
+                throw new Exception(e.ToString());
 
             }
         }
@@ -205,7 +205,7 @@ namespace DomoAggregatorPlugin
             catch (Exception e)
             {
                 EmailNotification.EmailNotificationSender(e.ToString());
-                throw new Exception("Unexpected error in GetRowData(), check email for details");
+                throw new Exception(e.ToString());
 
             }
         }
@@ -224,7 +224,7 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                if (_connections[_count-3].Reader.Read())
+                if (_connections[_count-1].Reader.Read())
                 {
                     _currentConnection = _connections[_count-1];
                     return true;
@@ -243,11 +243,8 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                LogEvent(LogMessageType.Error, "Recieved an unexpected error in DataReader MoveNext() Call, check email for details");
                 EmailNotification.EmailNotificationSender(e.ToString());
                 throw new Exception(e.ToString());
-                throw new Exception("Unexpected error in MoveNext(), check email for details");
-
             }
         }
 
