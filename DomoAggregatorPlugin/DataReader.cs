@@ -123,7 +123,9 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                EmailNotification.EmailNotificationSender(e.ToString(), "Dispose");
+                EmailNotification.EmailNotificationSender(e.ToString());
+                throw new Exception("Unexpected error in Dispose(), check email for details");
+
             }
         }
 
@@ -202,8 +204,9 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                EmailNotification.EmailNotificationSender(e.ToString(), "GetRowData");
-                return null;
+                EmailNotification.EmailNotificationSender(e.ToString());
+                throw new Exception("Unexpected error in GetRowData(), check email for details");
+
             }
         }
 
@@ -231,7 +234,7 @@ namespace DomoAggregatorPlugin
                     PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
                 if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
-                    OpenHelper();
+                    OpenConnection();
                     _moveNextBool = true;
                     return true;
                 }
@@ -241,8 +244,10 @@ namespace DomoAggregatorPlugin
             catch (Exception e)
             {
                 LogEvent(LogMessageType.Error, "Recieved an unexpected error in DataReader MoveNext() Call, check email for details");
-                EmailNotification.EmailNotificationSender(e.ToString(), "MoveNext()");
-                return false;
+                EmailNotification.EmailNotificationSender(e.ToString());
+                throw new Exception(e.ToString());
+                throw new Exception("Unexpected error in MoveNext(), check email for details");
+
             }
         }
 
@@ -258,11 +263,11 @@ namespace DomoAggregatorPlugin
             {
                 LogEvent(LogMessageType.Error, "No Query was provided. Please update the Source with a valid SQL query.");
             }
-            
-            OpenHelper();
+
+            OpenConnection();
         }
 
-        private void OpenHelper()
+        private void OpenConnection()
         {
             LogEvent(LogMessageType.Progress, "Open start");
 

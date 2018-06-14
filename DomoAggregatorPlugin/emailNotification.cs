@@ -11,7 +11,7 @@ namespace DomoAggregatorPlugin
 {
     public class EmailNotification
     {
-        public static void EmailNotificationSender(string exception, string exceptionLocation)
+        public static void EmailNotificationSender(string exception)
         {
             //Establishes client connection
             SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
@@ -27,7 +27,7 @@ namespace DomoAggregatorPlugin
             msg.To.Add("alexyuan24@gmail.com");
             msg.From = new MailAddress("buildiumtestdummy@gmail.com");
             msg.Subject = "DOMO Aggregator Plugin Exception";
-            msg.Body = "Plugin failed and threw Exception: " +"\r\n" + exception + " at location " + exceptionLocation;
+            msg.Body = ($"Plugin failed and thre Exception: {Environment.NewLine}{exception}");
             client.Send(msg);
            
         }
