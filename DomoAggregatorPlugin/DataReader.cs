@@ -18,7 +18,7 @@ namespace DomoAggregatorPlugin
     /// Provides a way to read a specific data source in a way Domo Workbench can understand.
     /// </summary>
     [AddIn("DomoAggregatorPlugin Reader", Publisher = "", Description = "DomoAggregatorPlugin Workbench Plugin", Version = "1.0.0.0")]
-    public class DataReader : IWorkbenchDataReaderPlugin
+    public class DataReader : IWorkbenchDataReaderPlugin 
     {
         private IWorkbenchHost _callbackHost;
         private bool _cancelRequested = false;
@@ -123,7 +123,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                LogEvent(LogMessageType.Debug, "dummy exception maybe send email");
+                EmailNotification.EmailNotificationSender(e.ToString(), "Dispose");
             }
         }
 
@@ -202,7 +202,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                LogEvent(LogMessageType.Debug, "place holder maybe send email");
+                EmailNotification.EmailNotificationSender(e.ToString(), "GetRowData");
                 return null;
             }
         }
@@ -221,7 +221,7 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                if (_connections[_count-1].Reader.Read())
+                if (_connections[_count-3].Reader.Read())
                 {
                     _currentConnection = _connections[_count-1];
                     return true;
@@ -240,7 +240,8 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                LogEvent(LogMessageType.Debug, "place holder maybe send email");
+                LogEvent(LogMessageType.Error, "Recieved an unexpected error in DataReader MoveNext() Call, check email for details");
+                EmailNotification.EmailNotificationSender(e.ToString(), "MoveNext()");
                 return false;
             }
         }
