@@ -39,7 +39,7 @@ namespace DomoAggregatorPlugin
             client.Timeout = 10000;
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
             client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential("buildiumtestdummy@gmail.com", "buildium123");
+            client.Credentials = new NetworkCredential("DomoPluginError@gmail.com", "Domo1234");
            
             MailMessage msg = new MailMessage();
             //destination email address
