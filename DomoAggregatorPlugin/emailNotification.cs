@@ -27,7 +27,7 @@ namespace DomoAggregatorPlugin
             msg.To.Add("alexyuan24@gmail.com");
             msg.From = new MailAddress("buildiumtestdummy@gmail.com");
             msg.Subject = "DOMO Aggregator Plugin Exception";
-            msg.Body = ($"Plugin failed and thre Exception: {Environment.NewLine}{exception}");
+            msg.Body = ($"Plugin failed and threw Exception: {Environment.NewLine}{exception}");
             client.Send(msg);
            
         }
