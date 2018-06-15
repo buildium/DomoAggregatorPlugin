@@ -1,0 +1,16 @@
+{
+  "exclude": [
+    "**/bin",
+    "**/bower_components",
+    "**/jspm_packages",
+    "**/node_modules",
+    "**/obj",
+    "**/platforms"
+  ],
+  "emailList": [
+    { "emailAddress": "alexyuan24@gmail.com" },
+    { "emailAddress": "alex.yuan@buildium.com" },
+    { "emailAddress": "test@buildium.com" }
+
+  ]
+}

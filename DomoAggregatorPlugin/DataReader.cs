@@ -5,9 +5,11 @@ using System.AddIn;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using WorkbenchPlugin.Views.Plugin.v3;
 using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
 using WorkbenchPlugin.Views.Plugin.v3.DataReader;
@@ -123,7 +125,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                EmailNotification.EmailNotificationSender(e.ToString());
+                new EmailNotification().EmailNotificationSender(e.ToString());
                 throw new Exception(e.ToString());
 
             }
@@ -204,7 +206,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                EmailNotification.EmailNotificationSender(e.ToString());
+                new EmailNotification().EmailNotificationSender(e.ToString());
                 throw new Exception(e.ToString());
 
             }
@@ -224,7 +226,7 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                if (_connections[_count-1].Reader.Read())
+                if (_connections[_count-3].Reader.Read())
                 {
                     _currentConnection = _connections[_count-1];
                     return true;
@@ -243,7 +245,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                EmailNotification.EmailNotificationSender(e.ToString());
+                new EmailNotification().EmailNotificationSender(e.ToString());
                 throw new Exception(e.ToString());
             }
         }
@@ -260,9 +262,10 @@ namespace DomoAggregatorPlugin
             {
                 LogEvent(LogMessageType.Error, "No Query was provided. Please update the Source with a valid SQL query.");
             }
-
             OpenConnection();
         }
+
+
 
         private void OpenConnection()
         {
