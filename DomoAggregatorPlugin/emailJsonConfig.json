@@ -8,9 +8,7 @@
     "**/platforms"
   ],
   "emailList": [
-    { "emailAddress": "alexyuan24@gmail.com" },
-    { "emailAddress": "alex.yuan@buildium.com" },
-    { "emailAddress": "test@buildium.com" }
-
+    { "emailAddress": "brian.decandia@buildium.com" },
+    { "emailAddress": "chris.bobek@buildium.com" }
   ]
 }
