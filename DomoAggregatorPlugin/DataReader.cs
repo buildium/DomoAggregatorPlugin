@@ -172,7 +172,7 @@ namespace DomoAggregatorPlugin
                     _moveNextBool = false;
                 }
 
-                //LogEvent(LogMessageType.Progress, "GetRowData Start");
+                LogEvent(LogMessageType.Progress, "GetRowData Start");
                 List<object> rowData = new List<object>();
 
                 // send the row data back in the same order as the headers
@@ -200,7 +200,7 @@ namespace DomoAggregatorPlugin
                     }
                 }
 
-                //LogEvent(LogMessageType.Progress, "GetRowData End");
+                LogEvent(LogMessageType.Progress, "GetRowData End");
 
                 return rowData;
             }
