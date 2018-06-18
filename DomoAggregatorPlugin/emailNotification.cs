@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Net.Configuration;
 using System.Reflection;
+using GalaSoft.MvvmLight.Helpers;
 using Newtonsoft.Json;
 using WorkbenchPlugin.Views.Plugin.v3;
 
@@ -15,20 +16,25 @@ namespace DomoAggregatorPlugin
 {
     public class EmailNotification
     {
-        private List<string> _toList;
-
+        readonly List<string> _toList;
+        readonly string _username;
+        readonly string _password;
+            
         public EmailNotification()
         {
             _toList = new List<string>();
-            string path = Directory.GetParent(Directory.GetParent(Path.Combine(AppDomain.CurrentDomain.BaseDirectory)).ToString()).ToString() +"\\emailJsonConfig.json";
+            string path = Directory.GetParent(Directory.GetParent(Path.Combine(AppDomain.CurrentDomain.BaseDirectory)).ToString()) +"\\emailJsonConfig.json";
             var jsonFileLocation = File.ReadAllText(path);
             var jsonEmailList = JsonConvert.DeserializeObject<dynamic>(jsonFileLocation);
+
             for (int i = 0; i < jsonEmailList.emailList.Count; i++)
             {
                 string emailAddress = jsonEmailList.emailList[i].emailAddress.ToString();
                 _toList.Add(emailAddress);
             }
 
+            _username = jsonEmailList.sendingEmailCredentials.username.ToString();
+            _password = jsonEmailList.sendingEmailCredentials.password.ToString();
         }
 
         public void EmailNotificationSender(string exception)
@@ -39,7 +45,7 @@ namespace DomoAggregatorPlugin
             client.Timeout = 10000;
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
             client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential("DomoPluginError@gmail.com", "Domo1234");
+            client.Credentials = new NetworkCredential(_username, _password);
            
             MailMessage msg = new MailMessage();
             //destination email address
