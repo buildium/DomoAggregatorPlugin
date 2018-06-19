@@ -44,11 +44,6 @@ namespace DomoAggregatorPlugin
             client.Credentials = new NetworkCredential(_username, _password);
            
             MailMessage msg = new MailMessage();
-
-            //foreach (var emailList in _toList[0].emailList)
-            //{
-            //    msg.To.Add(emailList.emailAddress.ToString());
-            //}
             foreach (var emailAddress in _toList)
             {
                 msg.To.Add(emailAddress);
