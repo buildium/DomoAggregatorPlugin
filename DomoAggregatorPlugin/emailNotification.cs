@@ -44,11 +44,10 @@ namespace DomoAggregatorPlugin
            
             MailMessage msg = new MailMessage();
        
-            for (int i = 0; i < _toArray.emailList.Count; i++)
+            foreach (var emailList in _toArray.emailList)
             {
-                msg.To.Add(_toArray.emailList[i].emailAddress.ToString());
+                msg.To.Add(emailList.emailAddress.ToString());
             }
-
             msg.From = new MailAddress("DomoPluginError@gmail.com");
             msg.Subject = "DOMO Aggregator Plugin Exception";
             msg.Body = ($"Plugin failed and threw Exception: {Environment.NewLine}{exception}");
