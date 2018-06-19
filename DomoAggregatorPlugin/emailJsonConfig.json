@@ -1,9 +1,14 @@
-{
-  "emailList": [
-    { "emailAddress": "brian.decandia@buildium.com" },
-    { "emailAddress": "chris.bobek@buildium.com" }
-  ],
-
-"sendingEmailCredentials": {"username": "DomoPluginError@gmail.com", "password": "Domo1234" } 
-
-}
+[
+  {
+    "emailList": [
+      { "emailAddress": "brian.decandia@buildium.com" },
+      { "emailAddress": "chris.bobek@buildium.com" }
+    ]
+  },
+  {
+    "sendingEmailCredentials": {
+      "username": "DomoPluginError@gmail.com",
+      "password": "Domo1234"
+    }
+  }
+]

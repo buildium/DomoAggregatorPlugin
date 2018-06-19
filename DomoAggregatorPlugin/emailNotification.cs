@@ -18,18 +18,18 @@ namespace DomoAggregatorPlugin
     {
         readonly string _username;
         readonly string _password;
-        readonly dynamic _toArray;
+        readonly dynamic _toList;
         
 
         public EmailNotification()
         {
             string path = Directory.GetParent(Directory.GetParent(Path.Combine(AppDomain.CurrentDomain.BaseDirectory)).ToString()) +"\\emailJsonConfig.json";
             var jsonFileLocation = File.ReadAllText(path);
-            var jsonEmailList = JsonConvert.DeserializeObject<dynamic>(jsonFileLocation);
-
-            _toArray = jsonEmailList;
-            _username = jsonEmailList.sendingEmailCredentials.username.ToString();
-            _password = jsonEmailList.sendingEmailCredentials.password.ToString();
+            var jsonEmailList = JsonConvert.DeserializeObject<List<dynamic>>(jsonFileLocation);
+;
+            _toList = jsonEmailList;
+            _username = jsonEmailList[1].sendingEmailCredentials.username.ToString();
+            _password = jsonEmailList[1].sendingEmailCredentials.password.ToString();
         }
 
         public void EmailNotificationSender(string exception)
@@ -43,11 +43,12 @@ namespace DomoAggregatorPlugin
             client.Credentials = new NetworkCredential(_username, _password);
            
             MailMessage msg = new MailMessage();
-       
-            foreach (var emailList in _toArray.emailList)
+
+            foreach (var emailList in _toList[0].emailList)
             {
                 msg.To.Add(emailList.emailAddress.ToString());
             }
+
             msg.From = new MailAddress("DomoPluginError@gmail.com");
             msg.Subject = "DOMO Aggregator Plugin Exception";
             msg.Body = ($"Plugin failed and threw Exception: {Environment.NewLine}{exception}");
