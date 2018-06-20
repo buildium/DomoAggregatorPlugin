@@ -1,0 +1,11 @@
+{
+  "emailList": [
+    "brian.decandia@buildium.com",
+     "chris.bobek@buildium.com"
+  ],
+  "sendingEmailCredentials": {
+    "username": "DomoPluginError@gmail.com",
+    "password": "Domo1234"
+  }
+}
+

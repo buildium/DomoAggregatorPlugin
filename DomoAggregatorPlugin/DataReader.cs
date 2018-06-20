@@ -5,9 +5,11 @@ using System.AddIn;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using WorkbenchPlugin.Views.Plugin.v3;
 using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
 using WorkbenchPlugin.Views.Plugin.v3.DataReader;
@@ -18,7 +20,7 @@ namespace DomoAggregatorPlugin
     /// Provides a way to read a specific data source in a way Domo Workbench can understand.
     /// </summary>
     [AddIn("DomoAggregatorPlugin Reader", Publisher = "", Description = "DomoAggregatorPlugin Workbench Plugin", Version = "1.0.0.0")]
-    public class DataReader : IWorkbenchDataReaderPlugin
+    public class DataReader : IWorkbenchDataReaderPlugin 
     {
         private IWorkbenchHost _callbackHost;
         private bool _cancelRequested = false;
@@ -30,6 +32,9 @@ namespace DomoAggregatorPlugin
 
         private const string DatabaseSourceColumnName = "subscriber_database";
         private const string LastValueParameter = "lastvalue";
+
+        private int _count;
+        private bool _moveNextBool;
 
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
@@ -109,11 +114,20 @@ namespace DomoAggregatorPlugin
         /// </summary>
         public void Dispose()
         {
-            foreach (var connectionMetadata in _connections)
+            try
             {
-                connectionMetadata.Reader?.Close();
-                connectionMetadata.Reader?.Dispose();
-                connectionMetadata.Connection?.Close();
+                foreach (var connectionMetadata in _connections)
+                {
+                    connectionMetadata.Reader?.Close();
+                    connectionMetadata.Reader?.Dispose();
+                    connectionMetadata.Connection?.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                new EmailNotification().EmailNotificationSender(e.ToString());
+                throw new Exception(e.ToString());
+
             }
         }
 
@@ -150,37 +164,52 @@ namespace DomoAggregatorPlugin
         /// <returns>A list of row data.</returns>
         public List<object> GetRowData()
         {
-            LogEvent(LogMessageType.Progress, "GetRowData Start");
-            List<object> rowData = new List<object>();
-
-            // send the row data back in the same order as the headers
-            foreach (var header in GetHeaders())
+            try
             {
-                //Add data for additional data source column allowing us to determine where the query results originated from
-                if (DatabaseSourceColumnName.Equals(header))
+                if (_moveNextBool)
                 {
-                    rowData.Add(_currentConnection.DSN);
-                    continue;
+                    MoveNext();
+                    _moveNextBool = false;
                 }
 
-                rowData.Add(_currentConnection.Reader[header]);
+                LogEvent(LogMessageType.Progress, "GetRowData Start");
+                List<object> rowData = new List<object>();
 
-                var key = $"{_currentConnection.DSN}:{header}";
-                if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
+                // send the row data back in the same order as the headers
+                foreach (var header in GetHeaders())
                 {
-                    _readerProperties.QueryVariables[key] = _currentConnection.Reader[header].ToString();
-                    _callbackHost.SetReaderProperties(PropertyHelper.Serialize(_readerProperties));
+                    //Add data for additional data source column allowing us to determine where the query results originated from
+                    if (DatabaseSourceColumnName.Equals(header))
+                    {
+                        rowData.Add(_currentConnection.DSN);
+                        continue;
+                    }
+
+                    rowData.Add(_currentConnection.Reader[header]);
+
+                    var key = $"{_currentConnection.DSN}:{header}";
+                    if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
+                    {
+                        _readerProperties.QueryVariables[key] = _currentConnection.Reader[header].ToString();
+                        _callbackHost.SetReaderProperties(PropertyHelper.Serialize(_readerProperties));
+                    }
+
+                    if (_cancelRequested)
+                    {
+                        throw new OperationCanceledException();
+                    }
                 }
 
-                if (_cancelRequested)
-                {
-                    throw new OperationCanceledException();
-                }
+                LogEvent(LogMessageType.Progress, "GetRowData End");
+
+                return rowData;
             }
+            catch (Exception e)
+            {
+                new EmailNotification().EmailNotificationSender(e.ToString());
+                throw new Exception(e.ToString());
 
-            LogEvent(LogMessageType.Progress, "GetRowData End");
-
-            return rowData;
+            }
         }
 
         public void Initialize(IWorkbenchHost workbenchHost, IWorkbenchDataProviderPlugin dataProvider)
@@ -195,15 +224,30 @@ namespace DomoAggregatorPlugin
         /// <returns>Whether or not there are more rows to read.</returns>
         public bool MoveNext()
         {
-            foreach (var connection in _connections)
+            try
             {
-                if (connection.Reader.Read())
+                if (_connections[_count-1].Reader.Read())
                 {
-                    _currentConnection = connection;
+                    _currentConnection = _connections[_count-1];
                     return true;
                 }
+
+                var dataProviderProperties =
+                    PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
+                if (_count < dataProviderProperties.ConnectionStrings.Count)
+                {
+                    OpenConnection();
+                    _moveNextBool = true;
+                    return true;
+                }
+
+                return false;
             }
-            return false;
+            catch (Exception e)
+            {
+                new EmailNotification().EmailNotificationSender(e.ToString());
+                throw new Exception(e.ToString());
+            }
         }
 
         /// <summary>
@@ -211,35 +255,39 @@ namespace DomoAggregatorPlugin
         /// </summary>
         public void Open()
         {
-            LogEvent(LogMessageType.Progress, "Open start");
-
             // load the properties from the UI
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
-
-            var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
 
             if (string.IsNullOrEmpty(_readerProperties.Query))
             {
                 LogEvent(LogMessageType.Error, "No Query was provided. Please update the Source with a valid SQL query.");
             }
-            // *******************************************************
+            OpenConnection();
+        }
 
 
-            foreach (var systemDSN in dataProviderProperties.ConnectionStrings)
-            {
-                var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
-                    _readerProperties.QueryVariables);
-                var connectionString = $"Dsn={systemDSN};";
-                LogEvent(LogMessageType.Warning, connectionString);
-                var odbcConnection = new OdbcConnection(connectionString);
-                var command = new OdbcCommand(parsedQuery, odbcConnection);
-                command.CommandTimeout = _readerProperties.Timeout;
-                odbcConnection.Open();
-                var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
-                _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
-            }
+
+        private void OpenConnection()
+        {
+            LogEvent(LogMessageType.Progress, "Open start");
+
+            var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
+
+            var systemDSN = dataProviderProperties.ConnectionStrings[_count];
+            var parsedQuery = FindReplacementParameters(_readerProperties.Query, systemDSN,
+                _readerProperties.QueryVariables);
+            var connectionString = $"Dsn={systemDSN};";
+            LogEvent(LogMessageType.Warning, connectionString);
+            var odbcConnection = new OdbcConnection(connectionString);
+            var command = new OdbcCommand(parsedQuery, odbcConnection);
+            command.CommandTimeout = _readerProperties.Timeout;
+            odbcConnection.Open();
+            var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
+            _count++; 
 
             LogEvent(LogMessageType.Progress, "Open end");
+
         }
 
         private string FindReplacementParameters(string query, string systemDSN, IDictionary<string, string> replacementValues)
