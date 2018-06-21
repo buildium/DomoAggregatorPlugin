@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using WorkbenchPlugin.Views.Plugin.v3;
 using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
 using WorkbenchPlugin.Views.Plugin.v3.DataReader;
+using WorkbenchSDK.Configuration;
 
 namespace DomoAggregatorPlugin
 {
@@ -125,7 +126,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                new EmailNotification().EmailNotificationSender(e.ToString());
+                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "Dispose()");
                 throw new Exception(e.ToString());
 
             }
@@ -206,7 +207,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                new EmailNotification().EmailNotificationSender(e.ToString());
+                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "GetRowData()");
                 throw new Exception(e.ToString());
 
             }
@@ -226,7 +227,7 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                if (_connections[_count-1].Reader.Read())
+                if (_connections[_count-3].Reader.Read())
                 {
                     _currentConnection = _connections[_count-1];
                     return true;
@@ -245,7 +246,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                new EmailNotification().EmailNotificationSender(e.ToString());
+                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "MoveNext()");
                 throw new Exception(e.ToString());
             }
         }

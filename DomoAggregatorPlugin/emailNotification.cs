@@ -33,7 +33,7 @@ namespace DomoAggregatorPlugin
             _password = jsonEmailList.sendingEmailCredentials.password.ToString();
         }
 
-        public void EmailNotificationSender(string exception)
+        public void EmailNotificationSender(string exception, string failedJob, string failedMethod)
         {
             //Establishes client connection
             SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
@@ -50,7 +50,7 @@ namespace DomoAggregatorPlugin
             }
             msg.From = new MailAddress("DomoPluginError@gmail.com");
             msg.Subject = "DOMO Aggregator Plugin Exception";
-            msg.Body = ($"Plugin failed and threw Exception: {Environment.NewLine}{exception}");
+            msg.Body = ($"Failed Job: {failedJob}{Environment.NewLine}Failed Method: {failedMethod}{Environment.NewLine}Exception Thrown: {Environment.NewLine}{exception}");
             client.Send(msg);
            
         }
