@@ -227,7 +227,7 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                if (_connections[_count-3].Reader.Read())
+                if (_connections[_count-1].Reader.Read())
                 {
                     _currentConnection = _connections[_count-1];
                     return true;
