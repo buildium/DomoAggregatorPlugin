@@ -285,7 +285,8 @@ namespace DomoAggregatorPlugin
             odbcConnection.Open();
             var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
-            _count++; 
+            _count++;
+            _currentConnection = _connections[_count - 1];
 
             LogEvent(LogMessageType.Progress, "Open end");
 
