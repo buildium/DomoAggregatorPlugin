@@ -185,7 +185,14 @@ namespace DomoAggregatorPlugin
                         rowData.Add(_currentConnection.DSN);
                         continue;
                     }
+                    //var dataProviderProperties = PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
 
+                    //LogEvent(LogMessageType.Progress,  _currentConnection.Reader.HasRows.ToString() +"yaedeadada");
+
+                    if (!_currentConnection.Reader.HasRows)
+                    {
+                        return rowData;
+                    }
                     rowData.Add(_currentConnection.Reader[header]);
 
                     var key = $"{_currentConnection.DSN}:{header}";
