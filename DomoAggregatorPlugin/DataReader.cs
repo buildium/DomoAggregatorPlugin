@@ -186,6 +186,10 @@ namespace DomoAggregatorPlugin
                         continue;
                     }
 
+                    if (!_currentConnection.Reader.HasRows)
+                    {
+                        return rowData;
+                    }
                     rowData.Add(_currentConnection.Reader[header]);
 
                     var key = $"{_currentConnection.DSN}:{header}";
