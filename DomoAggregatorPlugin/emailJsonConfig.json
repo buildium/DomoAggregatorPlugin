@@ -1,9 +1,9 @@
 {
   "emailList": [
-    //"brian.decandia@buildium.com",
-    //"chris.bobek@buildium.com",
-    "alex.yuan@buildium.com"
-    //"josh.molloy@buildium.com"
+    "brian.decandia@buildium.com",
+    "chris.bobek@buildium.com",
+    "alex.yuan@buildium.com",
+    "josh.molloy@buildium.com"
   ],
   "sendingEmailCredentials": {
     "username": "DomoPluginError@gmail.com",
