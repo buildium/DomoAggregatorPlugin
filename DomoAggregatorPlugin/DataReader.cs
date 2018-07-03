@@ -189,12 +189,7 @@ namespace DomoAggregatorPlugin
                         rowData.Add(_currentConnection.DSN);
                         continue;
                     }
-                    if (!_currentConnection.Reader.HasRows)
-                    {
-                        LogEvent(LogMessageType.Progress, "GetRowData !_currentConnection.Reader.HasRows");
-                        return rowData;
-                    }
-                    rowData.Add(_currentConnection.Reader[header]);
+                  
 
                     var key = $"{_currentConnection.DSN}:{header}";
                     if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
