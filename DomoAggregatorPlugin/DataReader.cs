@@ -194,8 +194,6 @@ namespace DomoAggregatorPlugin
                         LogEvent(LogMessageType.Progress, "GetRowData !_currentConnection.Reader.HasRows");
                         return rowData;
                     }
-                    LogEvent(LogMessageType.Progress, _currentConnection.Reader[header].ToString());
-
                     rowData.Add(_currentConnection.Reader[header]);
 
                     var key = $"{_currentConnection.DSN}:{header}";
