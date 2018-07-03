@@ -189,7 +189,7 @@ namespace DomoAggregatorPlugin
                         rowData.Add(_currentConnection.DSN);
                         continue;
                     }
-                  
+
 
                     var key = $"{_currentConnection.DSN}:{header}";
                     if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
