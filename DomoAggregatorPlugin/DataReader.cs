@@ -37,9 +37,6 @@ namespace DomoAggregatorPlugin
 
         private int _count;
         private bool _moveNextBool;
-        private bool dummy = false;
-        //private List<object> rowData = new List<object>();
-        //private bool firstDataBaseFail = false;
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
         /// </summary>
@@ -135,13 +132,7 @@ namespace DomoAggregatorPlugin
             }
         }
 
-        public void disposeSingleConnection()
-        {
-           ConnectionMetadata connectionMetaDataThing = _connections[_count-1];
-            //connectionMetaDataThing.Reader?.Close();
-            //connectionMetaDataThing.Reader?.Dispose();
-           //connectionMetaDataThing.Connection?.Close();
-        }
+     
 
         /// <summary>
         /// Gets the editor for this DataReader.
@@ -181,18 +172,14 @@ namespace DomoAggregatorPlugin
 
                 if (_moveNextBool)
                 {
-                    //if(dummy == true)
-                    //{
-                    //    _count = _count + 1;
-                    //}
                     MoveNext();
                     _moveNextBool = false;
                 }
-
+           
                 LogEvent(LogMessageType.Progress, "GetRowData Start" + _currentConnection.DSN.ToString());
           
                 List<object> rowData = new List<object>();
-             
+
                 // send the row data back in the same order as the headers
                 foreach (var header in GetHeaders())
                 {
@@ -225,6 +212,7 @@ namespace DomoAggregatorPlugin
                 }
 
                 LogEvent(LogMessageType.Progress, "GetRowData End");
+           
                 return rowData;
             }
             catch (Exception e)
@@ -249,27 +237,11 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-                //LogEvent(LogMessageType.Progress, "count is " + _count +" and connection is movenext() " + _currentConnection.DSN.ToString());
-
-                //if (_currentConnection.DSN == "subscribera" && dummy == false)
-                //{
-                //    LogEvent(LogMessageType.Progress, "exception will be thrown in MoveNext, Dummy Val is" + dummy.ToString());
-                //    //dummy = true;
-                //    throw new DivideByZeroException();
-                //}
                 if (_connections[_count-1].Reader.Read())
                 {
-                    if (dummy == true)
-                    {
-                        _currentConnection = _connections[_count];
-                        return true;
-                    }
-                    else
-                    {
-                        LogEvent(LogMessageType.Progress, _connections[_count - 1].DSN.ToString() + " _currentConnection set, in MoveNext()");
-                        _currentConnection = _connections[_count - 1];
-                        return true;
-                    }
+                    LogEvent(LogMessageType.Progress, "setting the _connections and count is" + _count);
+                    _currentConnection = _connections[_count - 1];
+                    return true;
                 }
 
                 var dataProviderProperties =
@@ -277,6 +249,8 @@ namespace DomoAggregatorPlugin
 
                 if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
+                    LogEvent(LogMessageType.Progress, "in count less ten reopening connection");
+
                     OpenConnection();
                     _moveNextBool = true;
                     return true;
@@ -286,30 +260,22 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
-                //if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)))
-                //{
-
-                //}
-                if (e.GetType().IsAssignableFrom(typeof(System.DivideByZeroException)))
+                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)))
                 {
                     restartConnection();
                     return true;
                 }
-                
+
                 new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "MoveNext()");
                 throw new Exception(e.ToString());
             }
         }
         private void restartConnection()
         {
+            _connections.RemoveAt(_count - 1);
             _count = _count - 1; 
-            dummy = true;
-            LogEvent(LogMessageType.Progress, "about to call Open() in exception");
             Open();
-            LogEvent(LogMessageType.Progress, "about to call MoveNext() in exception");
             MoveNext();
-            LogEvent(LogMessageType.Progress, "about to call getrowdata() in exception");
-
         }
 
         /// <summary>
@@ -349,8 +315,6 @@ namespace DomoAggregatorPlugin
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
             _count++;
             _currentConnection = _connections[_count - 1];
-
-
             LogEvent(LogMessageType.Progress, "Open end");
 
         }
