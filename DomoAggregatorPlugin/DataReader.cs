@@ -15,13 +15,14 @@ using WorkbenchPlugin.Views.Plugin.v3.DataProvider;
 using WorkbenchPlugin.Views.Plugin.v3.DataReader;
 using WorkbenchSDK.Configuration;
 
+
 namespace DomoAggregatorPlugin
 {
     /// <summary>
     /// Provides a way to read a specific data source in a way Domo Workbench can understand.
     /// </summary>
     [AddIn("DomoAggregatorPlugin Reader", Publisher = "", Description = "DomoAggregatorPlugin Workbench Plugin", Version = "1.0.0.0")]
-    public class DataReader : IWorkbenchDataReaderPlugin 
+    public class DataReader : IWorkbenchDataReaderPlugin
     {
         private IWorkbenchHost _callbackHost;
         private bool _cancelRequested = false;
@@ -36,7 +37,9 @@ namespace DomoAggregatorPlugin
 
         private int _count;
         private bool _moveNextBool;
-
+        private bool dummy = false;
+        //private List<object> rowData = new List<object>();
+        //private bool firstDataBaseFail = false;
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
         /// </summary>
@@ -132,6 +135,14 @@ namespace DomoAggregatorPlugin
             }
         }
 
+        public void disposeSingleConnection()
+        {
+           ConnectionMetadata connectionMetaDataThing = _connections[_count-1];
+            //connectionMetaDataThing.Reader?.Close();
+            //connectionMetaDataThing.Reader?.Dispose();
+           //connectionMetaDataThing.Connection?.Close();
+        }
+
         /// <summary>
         /// Gets the editor for this DataReader.
         /// </summary>
@@ -167,15 +178,21 @@ namespace DomoAggregatorPlugin
         {
             try
             {
+
                 if (_moveNextBool)
                 {
+                    //if(dummy == true)
+                    //{
+                    //    _count = _count + 1;
+                    //}
                     MoveNext();
                     _moveNextBool = false;
                 }
 
-                LogEvent(LogMessageType.Progress, "GetRowData Start");
+                LogEvent(LogMessageType.Progress, "GetRowData Start" + _currentConnection.DSN.ToString());
+          
                 List<object> rowData = new List<object>();
-
+             
                 // send the row data back in the same order as the headers
                 foreach (var header in GetHeaders())
                 {
@@ -185,6 +202,12 @@ namespace DomoAggregatorPlugin
                         rowData.Add(_currentConnection.DSN);
                         continue;
                     }
+                    if (!_currentConnection.Reader.HasRows)
+                    {
+                        LogEvent(LogMessageType.Progress, "GetRowData !_currentConnection.Reader.HasRows");
+                        return rowData;
+                    }
+                    LogEvent(LogMessageType.Progress, _currentConnection.Reader[header].ToString());
 
                     rowData.Add(_currentConnection.Reader[header]);
 
@@ -202,7 +225,6 @@ namespace DomoAggregatorPlugin
                 }
 
                 LogEvent(LogMessageType.Progress, "GetRowData End");
-
                 return rowData;
             }
             catch (Exception e)
@@ -227,14 +249,32 @@ namespace DomoAggregatorPlugin
         {
             try
             {
+                //LogEvent(LogMessageType.Progress, "count is " + _count +" and connection is movenext() " + _currentConnection.DSN.ToString());
+
+                //if (_currentConnection.DSN == "subscribera" && dummy == false)
+                //{
+                //    LogEvent(LogMessageType.Progress, "exception will be thrown in MoveNext, Dummy Val is" + dummy.ToString());
+                //    //dummy = true;
+                //    throw new DivideByZeroException();
+                //}
                 if (_connections[_count-1].Reader.Read())
                 {
-                    _currentConnection = _connections[_count-1];
-                    return true;
+                    if (dummy == true)
+                    {
+                        _currentConnection = _connections[_count];
+                        return true;
+                    }
+                    else
+                    {
+                        LogEvent(LogMessageType.Progress, _connections[_count - 1].DSN.ToString() + " _currentConnection set, in MoveNext()");
+                        _currentConnection = _connections[_count - 1];
+                        return true;
+                    }
                 }
 
                 var dataProviderProperties =
                     PropertyHelper.Deserialize<MyDataProviderProperties>(_callbackHost.GetProviderProperties());
+
                 if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
                     OpenConnection();
@@ -246,9 +286,30 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
+                //if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)))
+                //{
+
+                //}
+                if (e.GetType().IsAssignableFrom(typeof(System.DivideByZeroException)))
+                {
+                    restartConnection();
+                    return true;
+                }
+                
                 new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "MoveNext()");
                 throw new Exception(e.ToString());
             }
+        }
+        private void restartConnection()
+        {
+            _count = _count - 1; 
+            dummy = true;
+            LogEvent(LogMessageType.Progress, "about to call Open() in exception");
+            Open();
+            LogEvent(LogMessageType.Progress, "about to call MoveNext() in exception");
+            MoveNext();
+            LogEvent(LogMessageType.Progress, "about to call getrowdata() in exception");
+
         }
 
         /// <summary>
@@ -256,6 +317,7 @@ namespace DomoAggregatorPlugin
         /// </summary>
         public void Open()
         {
+
             // load the properties from the UI
             _readerProperties = PropertyHelper.Deserialize<MyDataReaderProperties>(_callbackHost.GetReaderProperties());
 
@@ -287,6 +349,7 @@ namespace DomoAggregatorPlugin
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
             _count++;
             _currentConnection = _connections[_count - 1];
+
 
             LogEvent(LogMessageType.Progress, "Open end");
 
