@@ -169,14 +169,13 @@ namespace DomoAggregatorPlugin
         {
             try
             {
-
                 if (_moveNextBool)
                 {
                     MoveNext();
                     _moveNextBool = false;
                 }
            
-                LogEvent(LogMessageType.Progress, "GetRowData Start" + _currentConnection.DSN.ToString());
+                LogEvent(LogMessageType.Progress, "GetRowData Start");
           
                 List<object> rowData = new List<object>();
 
@@ -237,7 +236,6 @@ namespace DomoAggregatorPlugin
             {
                 if (_connections[_count-1].Reader.Read())
                 {
-                    LogEvent(LogMessageType.Progress, "setting the _connections and count is" + _count);
                     _currentConnection = _connections[_count - 1];
                     return true;
                 }
@@ -247,8 +245,6 @@ namespace DomoAggregatorPlugin
 
                 if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
-                    LogEvent(LogMessageType.Progress, "in count less ten reopening connection");
-
                     OpenConnection();
                     _moveNextBool = true;
                     return true;
