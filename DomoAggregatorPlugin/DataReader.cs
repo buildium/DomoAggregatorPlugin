@@ -193,6 +193,7 @@ namespace DomoAggregatorPlugin
                     {
                         return rowData;
                     }
+
                     rowData.Add(_currentConnection.Reader[header]);
 
                     var key = $"{_currentConnection.DSN}:{header}";
@@ -254,6 +255,7 @@ namespace DomoAggregatorPlugin
             }
             catch (Exception e)
             {
+                //If exception is ODBC, restart current connection
                 if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)))
                 {
                     restartConnection();
@@ -264,6 +266,10 @@ namespace DomoAggregatorPlugin
                 throw new Exception(e.ToString());
             }
         }
+
+        /// <summary>
+        /// Restarts connection when MoveNext() throws Odbc connection exception.
+        /// </summary>
         private void restartConnection()
         {
             _connections.RemoveAt(_count - 1);
@@ -273,7 +279,7 @@ namespace DomoAggregatorPlugin
         }
 
         /// <summary>
-        /// Opens the data set in preparation for the Read operation.
+        /// Begins Open Connection process, checks if valid query was provided.
         /// </summary>
         public void Open()
         {
@@ -289,7 +295,9 @@ namespace DomoAggregatorPlugin
         }
 
 
-
+        /// <summary>
+        /// Opens the data set in preparation for the Read operation.
+        /// </summary>
         private void OpenConnection()
         {
             LogEvent(LogMessageType.Progress, "Open start");
@@ -306,6 +314,8 @@ namespace DomoAggregatorPlugin
             command.CommandTimeout = _readerProperties.Timeout;
             odbcConnection.Open();
             var odbcReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            
+            //global list of connections, connection added is found in dataProviderProperties.ConnectionStrings at index _count
             _connections.Add(new ConnectionMetadata(systemDSN, odbcConnection, odbcReader));
             _count++;
             _currentConnection = _connections[_count - 1];
