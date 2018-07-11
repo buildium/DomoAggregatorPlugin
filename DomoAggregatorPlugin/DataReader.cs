@@ -37,6 +37,7 @@ namespace DomoAggregatorPlugin
 
         private int _count;
         private bool _moveNextBool;
+        private int _restartTimeoutCount;
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
         /// </summary>
@@ -256,13 +257,14 @@ namespace DomoAggregatorPlugin
             catch (Exception e)
             {
                 //If exception is ODBC, restart current connection
-                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)))
+                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)) && _restartTimeoutCount<5)
                 {
+                    _restartTimeoutCount++;
                     restartConnection();
                     return true;
                 }
 
-                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "MoveNext()");
+                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), $"MoveNext(), attempted restart {_restartTimeoutCount} times");
                 throw new Exception(e.ToString());
             }
         }
