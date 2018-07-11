@@ -197,6 +197,10 @@ namespace DomoAggregatorPlugin
 
                     rowData.Add(_currentConnection.Reader[header]);
 
+                    // RESETS timeout count: If connection reaches GetRowData(), RestartConnection 
+                    // was never called or we are onto the next connection. Ensures EACH database can restart
+                    // up to 5 times
+                    _restartTimeoutCount = 0;
                     var key = $"{_currentConnection.DSN}:{header}";
                     if (_readerProperties.QueryVariables.ContainsKey(key) && _currentConnection.Reader[header] != null)
                     {
