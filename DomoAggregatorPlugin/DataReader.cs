@@ -261,7 +261,7 @@ namespace DomoAggregatorPlugin
             catch (Exception e)
             {
                 //If exception is ODBC, restart current connection
-                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)) && _restartTimeoutCount<5)
+                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)) && (_restartTimeoutCount < 5))
                 {
                     _restartTimeoutCount++;
                     restartConnection();
