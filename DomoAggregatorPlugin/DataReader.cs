@@ -176,11 +176,6 @@ namespace DomoAggregatorPlugin
                     _moveNextBool = false;
                 }
 
-                // RESETS timeout count: If connection reaches GetRowData(), RestartConnection 
-                // was never called or we are onto the next connection. Ensures EACH database can restart
-                // up to 5 times
-                _restartTimeoutCount = 0;
-
                 LogEvent(LogMessageType.Progress, "GetRowData Start");
           
                 List<object> rowData = new List<object>();
@@ -252,6 +247,10 @@ namespace DomoAggregatorPlugin
 
                 if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
+                    // RESETS timeout count: If connection reaches here, RestartConnection 
+                    // was never called or we are onto the next connection. Ensures EACH database can restart
+                    // up to 5 times
+                    _restartTimeoutCount = 0;
                     OpenConnection();
                     _moveNextBool = true;
                     return true;
