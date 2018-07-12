@@ -37,6 +37,7 @@ namespace DomoAggregatorPlugin
 
         private int _count;
         private bool _moveNextBool;
+        private int _restartTimeoutCount;
         /// <summary>
         /// Any execution characteristics that are needed by this DataReader
         /// </summary>
@@ -174,7 +175,7 @@ namespace DomoAggregatorPlugin
                     MoveNext();
                     _moveNextBool = false;
                 }
-           
+
                 LogEvent(LogMessageType.Progress, "GetRowData Start");
           
                 List<object> rowData = new List<object>();
@@ -246,6 +247,10 @@ namespace DomoAggregatorPlugin
 
                 if (_count < dataProviderProperties.ConnectionStrings.Count)
                 {
+                    // RESETS timeout count: If connection reaches here, RestartConnection 
+                    // was never called or we are onto the next connection. Ensures EACH database can restart
+                    // up to 5 times
+                    _restartTimeoutCount = 0;
                     OpenConnection();
                     _moveNextBool = true;
                     return true;
@@ -256,13 +261,14 @@ namespace DomoAggregatorPlugin
             catch (Exception e)
             {
                 //If exception is ODBC, restart current connection
-                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)))
+                if (e.GetType().IsAssignableFrom(typeof(System.Data.Odbc.OdbcException)) && (_restartTimeoutCount < 5))
                 {
+                    _restartTimeoutCount++;
                     restartConnection();
                     return true;
                 }
 
-                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), "MoveNext()");
+                new EmailNotification().EmailNotificationSender(e.ToString(), _callbackHost.GetJob().ToString(), $"MoveNext(), attempted restart {_restartTimeoutCount} times");
                 throw new Exception(e.ToString());
             }
         }
