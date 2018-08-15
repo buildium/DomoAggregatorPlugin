@@ -186,7 +186,7 @@ namespace DomoAggregatorPlugin
         public MyDataProviderProperties()
         {
             // optional default value
-            DataSources = "subscribera,subscribera2,subscriberb,subscriberc,subscriberd,subscribere,subscriberf,subscriberg,subscriberh";
+            DataSources = "subscribera,subscribera2,subscriberb,subscriberc,subscriberd,subscribere,subscriberf,subscriberg,subscriberh,subscriberi";
         }
 
         /// <summary>
